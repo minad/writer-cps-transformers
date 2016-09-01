@@ -109,16 +109,16 @@ instance Functor m => Functor (WriterT w m) where
   {-# INLINE fmap #-}
 
 instance Monad m => Applicative (WriterT w m) where
-  pure a = WriterT $ \w -> pure (a, w)
+  pure a = WriterT $ \w -> return (a, w)
   {-# INLINE pure #-}
 
   WriterT mf <*> WriterT mx = WriterT $ \w -> do
     (f, w') <- mf w
     (x, w'') <- mx w'
-    pure (f x, w'')
+    return (f x, w'')
   {-# INLINE (<*>) #-}
 
-instance MonadPlus m => Alternative (WriterT w m) where
+instance (Functor m, MonadPlus m) => Alternative (WriterT w m) where
   empty = WriterT $ const mzero
   {-# INLINE empty #-}
 
