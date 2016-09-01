@@ -108,7 +108,7 @@ instance Functor m => Functor (WriterT w m) where
   fmap f m = WriterT $ \w -> first f <$> unWriterT m w
   {-# INLINE fmap #-}
 
-instance Monad m => Applicative (WriterT w m) where
+instance (Functor m, Monad m) => Applicative (WriterT w m) where
   pure a = WriterT $ \w -> return (a, w)
   {-# INLINE pure #-}
 
@@ -145,7 +145,7 @@ instance Fail.MonadFail m => Fail.MonadFail (WriterT w m) where
   {-# INLINE fail #-}
 #endif
 
-instance MonadPlus m => MonadPlus (WriterT w m) where
+instance (Functor m, MonadPlus m) => MonadPlus (WriterT w m) where
   mzero = empty
   {-# INLINE mzero #-}
   mplus = (<|>)
@@ -155,8 +155,10 @@ instance MonadFix m => MonadFix (WriterT w m) where
   mfix f = WriterT $ \w -> mfix $ \ ~(a, _) -> unWriterT (f a) w
   {-# INLINE mfix #-}
 
-instance MonadTrans (WriterT s) where
-  lift m = WriterT $ \w -> (\a -> (a,w)) <$> m
+instance MonadTrans (WriterT w) where
+  lift m = WriterT $ \w -> do
+    a <- m
+    return (a, w)
   {-# INLINE lift #-}
 
 instance MonadIO m => MonadIO (WriterT w m) where

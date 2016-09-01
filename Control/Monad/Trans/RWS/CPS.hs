@@ -162,14 +162,14 @@ instance Functor m => Functor (RWST r w s m) where
   fmap f m = RWST $ \r s w -> (\(a, s', w') -> (f a, s', w')) <$> unRWST m r s w
   {-# INLINE fmap #-}
 
-instance Monad m => Applicative (RWST r w s m) where
-  pure a = RWST $ \_ s w -> pure (a, s, w)
+instance (Functor m, Monad m) => Applicative (RWST r w s m) where
+  pure a = RWST $ \_ s w -> return (a, s, w)
   {-# INLINE pure #-}
 
   RWST mf <*> RWST mx = RWST $ \r s w -> do
     (f, s', w')  <- mf r s w
     (x, s'', w'') <- mx r s' w'
-    pure (f x, s'', w'')
+    return (f x, s'', w'')
   {-# INLINE (<*>) #-}
 
 instance (Functor m, MonadPlus m) => Alternative (RWST r w s m) where
@@ -181,7 +181,7 @@ instance (Functor m, MonadPlus m) => Alternative (RWST r w s m) where
 
 instance Monad m => Monad (RWST r w s m) where
 #if !(MIN_VERSION_base(4,8,0))
-  return a = RWST $ \_ s w -> pure (a, s, w)
+  return a = RWST $ \_ s w -> return (a, s, w)
   {-# INLINE return #-}
 #endif
 
@@ -199,7 +199,7 @@ instance Fail.MonadFail m => Fail.MonadFail (RWST r w s m) where
   {-# INLINE fail #-}
 #endif
 
-instance MonadPlus m => MonadPlus (RWST r w s m) where
+instance (Functor m, MonadPlus m) => MonadPlus (RWST r w s m) where
   mzero = empty
   {-# INLINE mzero #-}
   mplus = (<|>)
@@ -210,7 +210,9 @@ instance MonadFix m => MonadFix (RWST r w s m) where
   {-# INLINE mfix #-}
 
 instance MonadTrans (RWST r w s) where
-  lift m = RWST $ \_ s w -> (\a -> (a,s,w)) <$> m
+  lift m = RWST $ \_ s w -> do
+    a <- m
+    return (a, s, w)
   {-# INLINE lift #-}
 
 instance MonadIO m => MonadIO (RWST r w s m) where
@@ -334,5 +336,5 @@ modify f = RWST $ \_ s w -> pure ((), f s, w)
 --
 -- * @'gets' f = 'liftM' f 'get'@
 gets :: Applicative m => (s -> a) -> RWST r w s m a
-gets f = RWST $ \ _ s w -> pure (f s, s, w)
+gets f = RWST $ \_ s w -> pure (f s, s, w)
 {-# INLINE gets #-}
