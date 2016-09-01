@@ -47,8 +47,8 @@ type Writer w = WriterT w Identity
 
 -- | Construct a writer computation from a (result, output) pair.
 -- (The inverse of 'runWriter'.)
-writer :: (Monoid w, Applicative m) => (a, w) -> WriterT w m a
-writer (a, w') = WriterT $ \w -> let wt = w `mappend` w' in wt `seq` pure (a, wt)
+writer :: (Monoid w, Monad m) => (a, w) -> WriterT w m a
+writer (a, w') = WriterT $ \w -> let wt = w `mappend` w' in wt `seq` return (a, wt)
 {-# INLINE writer #-}
 
 -- | Unwrap a writer computation as a (result, output) pair.
@@ -91,17 +91,22 @@ runWriterT m = unWriterT m mempty
 -- | Extract the output from a writer computation.
 --
 -- * @'execWriterT' m = 'liftM' 'snd' ('runWriterT' m)@
-execWriterT :: (Functor m, Monoid w) => WriterT w m a -> m w
-execWriterT = fmap snd . runWriterT
+execWriterT :: (Monad m, Monoid w) => WriterT w m a -> m w
+execWriterT m = do
+  (_, w) <- runWriterT m
+  return w
 {-# INLINE execWriterT #-}
 
 -- | Map both the return value and output of a computation using
 -- the given function.
 --
 -- * @'runWriterT' ('mapWriterT' f m) = f ('runWriterT' m)@
-mapWriterT :: (Functor n, Monoid w, Monoid w') =>
+mapWriterT :: (Monad n, Monoid w, Monoid w') =>
   (m (a, w) -> n (b, w')) -> WriterT w m a -> WriterT w' n b
-mapWriterT f m = WriterT $ \w -> second (mappend w) <$> f (runWriterT m)
+mapWriterT f m = WriterT $ \w -> do
+  (a, w') <- f (runWriterT m)
+  let wt = w `mappend` w'
+  wt `seq` return (a, wt)
 {-# INLINE mapWriterT #-}
 
 instance Functor m => Functor (WriterT w m) where
@@ -166,7 +171,7 @@ instance MonadIO m => MonadIO (WriterT w m) where
   {-# INLINE liftIO #-}
 
 -- | @'tell' w@ is an action that produces the output @w@.
-tell :: (Monoid w, Applicative m) => w -> WriterT w m ()
+tell :: (Monoid w, Monad m) => w -> WriterT w m ()
 tell w = writer ((), w)
 {-# INLINE tell #-}
 
@@ -174,7 +179,7 @@ tell w = writer ((), w)
 -- output to the value of the computation.
 --
 -- * @'runWriterT' ('listen' m) = 'liftM' (\\ (a, w) -> ((a, w), w)) ('runWriterT' m)@
-listen :: (Monoid w, Functor m) => WriterT w m a -> WriterT w m (a, w)
+listen :: (Monoid w, Monad m) => WriterT w m a -> WriterT w m (a, w)
 listen = listens id
 {-# INLINE listen #-}
 
@@ -184,10 +189,11 @@ listen = listens id
 -- * @'listens' f m = 'liftM' (id *** f) ('listen' m)@
 --
 -- * @'runWriterT' ('listens' f m) = 'liftM' (\\ (a, w) -> ((a, f w), w)) ('runWriterT' m)@
-listens :: (Monoid w, Functor m) => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
-listens f m = WriterT $ \w ->
-  (\(a, w') -> let wt = w `mappend` w'
-               in wt `seq` ((a, f w'), wt)) <$> runWriterT m
+listens :: (Monoid w, Monad m) => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
+listens f m = WriterT $ \w -> do
+  (a, w') <- runWriterT m
+  let wt = w `mappend` w'
+  wt `seq` return ((a, f w'), wt)
 {-# INLINE listens #-}
 
 -- | @'pass' m@ is an action that executes the action @m@, which returns
@@ -195,10 +201,11 @@ listens f m = WriterT $ \w ->
 -- to the output.
 --
 -- * @'runWriterT' ('pass' m) = 'liftM' (\\ ((a, f), w) -> (a, f w)) ('runWriterT' m)@
-pass :: (Monoid w, Monoid w', Functor m) => WriterT w m (a, w -> w') -> WriterT w' m a
-pass m = WriterT $ \w ->
-  (\((a, f), w') -> let wt = w `mappend` f w'
-                    in wt `seq` (a, wt)) <$> runWriterT m
+pass :: (Monoid w, Monoid w', Monad m) => WriterT w m (a, w -> w') -> WriterT w' m a
+pass m = WriterT $ \w -> do
+  ((a, f), w') <- runWriterT m
+  let wt = w `mappend` f w'
+  wt `seq` return (a, wt)
 {-# INLINE pass #-}
 
 -- | @'censor' f m@ is an action that executes the action @m@ and
@@ -208,8 +215,9 @@ pass m = WriterT $ \w ->
 -- * @'censor' f m = 'pass' ('liftM' (\\ x -> (x,f)) m)@
 --
 -- * @'runWriterT' ('censor' f m) = 'liftM' (\\ (a, w) -> (a, f w)) ('runWriterT' m)@
-censor :: (Monoid w, Functor m) => (w -> w) -> WriterT w m a -> WriterT w m a
-censor f m = WriterT $ \w ->
-  (\(a, w') -> let wt = w `mappend` f w'
-               in wt `seq` (a, wt)) <$> runWriterT m
+censor :: (Monoid w, Monad m) => (w -> w) -> WriterT w m a -> WriterT w m a
+censor f m = WriterT $ \w -> do
+  (a, w') <- runWriterT m
+  let wt = w `mappend` f w'
+  wt `seq` return (a, wt)
 {-# INLINE censor #-}
