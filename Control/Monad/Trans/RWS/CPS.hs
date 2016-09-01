@@ -37,8 +37,8 @@ module Control.Monad.Trans.RWS.CPS (
   state,
   get,
   put,
-  -- modify,
-  -- gets
+  modify,
+  gets
 ) where
 
 import Control.Applicative
