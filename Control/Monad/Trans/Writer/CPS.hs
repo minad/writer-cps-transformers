@@ -109,7 +109,7 @@ mapWriterT f m = WriterT $ \w -> do
 {-# INLINE mapWriterT #-}
 
 instance Functor m => Functor (WriterT w m) where
-  fmap f m = WriterT $ \w -> (\(a, w) -> (f a, w)) <$> unWriterT m w
+  fmap f m = WriterT $ \w -> (\(a, w') -> (f a, w')) <$> unWriterT m w
   {-# INLINE fmap #-}
 
 instance (Functor m, Monad m) => Applicative (WriterT w m) where
