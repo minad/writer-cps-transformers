@@ -1,0 +1,36 @@
+name: writer-cps-transformers
+version: 0.1.0.0
+synopsis: WriteT and RWST monad transformers
+description:
+  The WriterT and RWST monad transformers provided by writer-cps-transformers
+  are written in continuation passing style and avoid the space-leak
+  problem of the traditional Control.Monad.Trans.Writer.Strict/Lazy.
+category: Control
+author: Daniel Mendler
+maintainer: mail@daniel-mendler.de
+copyright: 2016 Daniel Mendler
+license: MIT
+github: minad/writer-cps-transformers
+
+ghc-options:
+- -Wall
+- -Widentities
+- -Wincomplete-uni-patterns
+- -Wincomplete-record-updates
+- -Wtabs
+
+dependencies:
+- base < 6
+- transformers >= 0.4 && < 0.6
+
+tested-with:
+  GHC == 7.0.4,
+  GHC == 7.2.2,
+  GHC == 7.4.2,
+  GHC == 7.6.3,
+  GHC == 7.8.4,
+  GHC == 7.10.3,
+  GHC == 8.0.1
+
+library:
+  source-dirs: .
