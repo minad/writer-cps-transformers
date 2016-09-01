@@ -26,7 +26,6 @@ module Control.Monad.Trans.Writer.CPS (
 ) where
 
 import Control.Applicative
-import Control.Arrow (first, second)
 import Control.Monad
 import Control.Monad.Fix
 import Control.Monad.IO.Class
@@ -110,7 +109,7 @@ mapWriterT f m = WriterT $ \w -> do
 {-# INLINE mapWriterT #-}
 
 instance Functor m => Functor (WriterT w m) where
-  fmap f m = WriterT $ \w -> first f <$> unWriterT m w
+  fmap f m = WriterT $ \w -> (\(a, w) -> (f a, w)) <$> unWriterT m w
   {-# INLINE fmap #-}
 
 instance (Functor m, Monad m) => Applicative (WriterT w m) where
