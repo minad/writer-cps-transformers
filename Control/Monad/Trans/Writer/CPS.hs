@@ -32,6 +32,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Functor.Identity
+import Data.Monoid
 
 #if MIN_VERSION_base(4,9,0)
 import qualified Control.Monad.Fail as Fail
