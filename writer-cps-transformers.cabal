@@ -7,7 +7,7 @@ version:        0.1.0.0
 license:        MIT
 license-file:   LICENSE
 tested-with:    GHC == 7.0.4, GHC == 7.2.2, GHC == 7.4.2, GHC == 7.6.3, GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.1
-author:         Daniel Mendler
+author:         Andy Gill, Ross Paterson, Daniel Mendler
 maintainer:     mail@daniel-mendler.de
 copyright:      2016 Daniel Mendler
 bug-reports:    https://github.com/minad/writer-cps-transformers/issues
@@ -28,7 +28,7 @@ library
     transformers >= 0.4 && < 0.6
   hs-source-dirs:
     .
-  ghc-options: -Wall -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wtabs
+  ghc-options: -Wall
   exposed-modules:
     Control.Monad.Trans.RWS.CPS
     Control.Monad.Trans.Writer.CPS
