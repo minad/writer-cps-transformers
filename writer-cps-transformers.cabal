@@ -14,7 +14,7 @@ bug-reports:    https://github.com/minad/writer-cps-transformers/issues
 category:       Control
 homepage:       https://github.com/minad/writer-cps-transformers#readme
 synopsis:       WriteT and RWST monad transformers
-description:    The WriterT and RWST monad transformers provided by writer-cps-transformers are written in continuation passing style and avoid the space-leak problem of the traditional Control.Monad.Trans.Writer.Strict/Lazy.
+description:    The WriterT and RWST monad transformers provided by writer-cps-transformers are written in continuation passing style and avoid the space-leak problem of the traditional Control.Monad.Trans.Writer.Strict/Lazy. The corresponding MTL class instances are in the package writer-cps-mtl (<https://hackage.haskell.org/package/writer-cps-mtl>).
 build-type:     Simple
 cabal-version:  >= 1.10
 
