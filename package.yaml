@@ -9,7 +9,7 @@ category: Control
 author: Andy Gill, Ross Paterson, Daniel Mendler
 maintainer: mail@daniel-mendler.de
 copyright: 2016 Daniel Mendler
-license: MIT
+license: BSD3
 github: minad/writer-cps-transformers
 
 ghc-options:
