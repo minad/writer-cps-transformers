@@ -1,5 +1,5 @@
 name: writer-cps-transformers
-version: 0.1.0.1
+version: 0.1.0.2
 synopsis: WriteT and RWST monad transformers
 description:
   The WriterT and RWST monad transformers provided by writer-cps-transformers
