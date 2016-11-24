@@ -46,7 +46,11 @@ module Control.Monad.Trans.Writer.CPS (
   listen,
   listens,
   pass,
-  censor
+  censor,
+  -- * Lifting other operations
+  liftCallCC,
+  liftCallCC',
+  liftCatch,
 ) where
 
 import Control.Applicative
@@ -54,6 +58,7 @@ import Control.Monad
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad.Signatures
 import Data.Functor.Identity
 import Data.Monoid
 
@@ -244,3 +249,24 @@ censor f m = WriterT $ \w -> do
   let wt = w `mappend` f w'
   wt `seq` return (a, wt)
 {-# INLINE censor #-}
+
+-- | Uniform lifting of a @callCC@ operation to the new monad.
+-- This version rolls back to the original state on entering the
+-- continuation.
+liftCallCC :: CallCC m (a, w) (b, w) -> CallCC (WriterT w m) a b
+liftCallCC callCC f = WriterT $ \w ->
+  callCC $ \c -> unWriterT (f (\a -> WriterT $ \_ -> c (a, w))) w
+{-# INLINE liftCallCC #-}
+
+-- | In-situ lifting of a @callCC@ operation to the new monad.
+-- This version uses the current state on entering the continuation.
+-- It does not satisfy the uniformity property (see "Control.Monad.Signatures").
+liftCallCC' :: CallCC m (a, w) (b, w) -> CallCC (WriterT w m) a b
+liftCallCC' callCC f = WriterT $ \w ->
+  callCC $ \c -> unWriterT (f (\a -> WriterT $ \w' -> c (a, w'))) w
+{-# INLINE liftCallCC' #-}
+
+-- | Lift a @catchE@ operation to the new monad.
+liftCatch :: Catch e m (a, w) -> Catch e (WriterT w m) a
+liftCatch catchE m h = WriterT $ \w -> unWriterT m w `catchE` \e -> unWriterT (h e) w
+{-# INLINE liftCatch #-}

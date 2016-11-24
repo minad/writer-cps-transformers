@@ -24,7 +24,7 @@
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.RWS.CPS (
-  -- * The RWS monda
+  -- * The RWS monad
   RWS,
   rws,
   runRWS,
@@ -56,7 +56,11 @@ module Control.Monad.Trans.RWS.CPS (
   get,
   put,
   modify,
-  gets
+  gets,
+  -- * Lifting other operations
+  liftCallCC,
+  liftCallCC',
+  liftCatch,
 ) where
 
 import Control.Applicative
@@ -64,6 +68,7 @@ import Control.Monad
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad.Signatures
 import Data.Functor.Identity
 import Data.Monoid
 
@@ -362,3 +367,24 @@ modify f = RWST $ \_ s w -> return ((), f s, w)
 gets :: Monad m => (s -> a) -> RWST r w s m a
 gets f = RWST $ \_ s w -> return (f s, s, w)
 {-# INLINE gets #-}
+
+-- | Uniform lifting of a @callCC@ operation to the new monad.
+-- This version rolls back to the original state on entering the
+-- continuation.
+liftCallCC :: CallCC m (a,s,w) (b,s,w) -> CallCC (RWST r w s m) a b
+liftCallCC callCC f = RWST $ \r s w ->
+  callCC $ \c -> unRWST (f (\a -> RWST $ \_ _ w' -> c (a, s, w'))) r s w
+{-# INLINE liftCallCC #-}
+
+-- | In-situ lifting of a @callCC@ operation to the new monad.
+-- This version uses the current state on entering the continuation.
+liftCallCC' :: CallCC m (a,s,w) (b,s,w) -> CallCC (RWST r w s m) a b
+liftCallCC' callCC f = RWST $ \r s w ->
+  callCC $ \c -> unRWST (f (\a -> RWST $ \_ s' w' -> c (a, s', w'))) r s w
+{-# INLINE liftCallCC' #-}
+
+-- | Lift a @catchE@ operation to the new monad.
+liftCatch :: Catch e m (a,s,w) -> Catch e (RWST r w s m) a
+liftCatch catchE m h =
+  RWST $ \r s w -> unRWST m r s w `catchE` \e -> unRWST (h e) r s w
+{-# INLINE liftCatch #-}
