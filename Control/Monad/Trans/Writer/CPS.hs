@@ -26,7 +26,7 @@
 --
 -- This version builds its output strictly and uses continuation-passing-style
 -- to achieve constant space usage. This transformer can be used as a
--- drop-in replacement for Control.Monad.Trans.Writer.Strict/Lazy.
+-- drop-in replacement for "Control.Monad.Trans.Writer.Strict".
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.Writer.CPS (

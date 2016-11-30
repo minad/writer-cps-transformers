@@ -20,7 +20,7 @@
 -- A monad transformer that combines 'ReaderT', 'WriterT' and 'StateT'.
 -- This version uses continuation-passing-style for the writer part
 -- to achieve constant space usage. This transformer can be used as a
--- drop-in replacement for Control.Monad.Trans.RWS.Strict/Lazy.
+-- drop-in replacement for "Control.Monad.Trans.RWS.Strict".
 -----------------------------------------------------------------------------
 
 module Control.Monad.Trans.RWS.CPS (
