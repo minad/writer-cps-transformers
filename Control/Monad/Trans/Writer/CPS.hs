@@ -69,7 +69,7 @@ import qualified Control.Monad.Fail as Fail
 -- ---------------------------------------------------------------------------
 -- | A writer monad parameterized by the type @w@ of output to accumulate.
 --
--- The 'return' function produces the output 'mempty', while @>>=@
+-- The 'return' function produces the output 'mempty', while '>>='
 -- combines the outputs of the subcomputations using 'mappend'.
 type Writer w = WriterT w Identity
 
@@ -107,7 +107,7 @@ mapWriter f = mapWriterT (Identity . f . runIdentity)
 --
 --   * @m@ - The inner monad.
 --
--- The 'return' function produces the output 'mempty', while @>>=@
+-- The 'return' function produces the output 'mempty', while '>>='
 -- combines the outputs of the subcomputations using 'mappend'.
 newtype WriterT w m a = WriterT { unWriterT :: w -> m (a, w) }
 
