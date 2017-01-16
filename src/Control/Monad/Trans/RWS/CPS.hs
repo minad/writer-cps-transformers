@@ -34,6 +34,7 @@ module Control.Monad.Trans.RWS.CPS (
   withRWS,
   -- * The RWST monad transformer
   RWST,
+  rwsT,
   runRWST,
   evalRWST,
   execRWST,
@@ -140,6 +141,9 @@ withRWS = withRWST
 -- collecting an output of type @w@ and updating a state of type @s@
 -- to an inner monad @m@.
 newtype RWST r w s m a = RWST { unRWST :: r -> s -> w -> m (a, s, w) }
+
+rwsT :: (Functor m, Monoid w) => (r -> s -> m (a, s, w)) -> RWST r w s m a
+rwsT f = RWST $ \r s w -> (\(a, s', w') -> let wt = w `mappend` w' in wt `seq` (a, s', wt)) <$> f r s
 
 -- | Unwrap an RWST computation as a function.
 runRWST :: Monoid w => RWST r w s m a -> r -> s -> m (a, s, w)

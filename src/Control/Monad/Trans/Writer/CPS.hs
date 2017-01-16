@@ -38,6 +38,7 @@ module Control.Monad.Trans.Writer.CPS (
   mapWriter,
   -- * The WriterT monad transformer
   WriterT,
+  writerT,
   runWriterT,
   execWriterT,
   mapWriterT,
@@ -113,6 +114,9 @@ mapWriter f = mapWriterT (Identity . f . runIdentity)
 -- The 'return' function produces the output 'mempty', while '>>='
 -- combines the outputs of the subcomputations using 'mappend'.
 newtype WriterT w m a = WriterT { unWriterT :: w -> m (a, w) }
+
+writerT :: (Functor m, Monoid w) => m (a, w) -> WriterT w m a
+writerT f = WriterT $ \w -> (\(a, w') -> let wt = w `mappend` w' in wt `seq` (a, wt)) <$> f
 
 -- | Unwrap a writer computation.
 runWriterT :: Monoid w => WriterT w m a -> m (a, w)
