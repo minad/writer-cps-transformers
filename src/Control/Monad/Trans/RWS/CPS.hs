@@ -33,7 +33,7 @@ module Control.Monad.Trans.RWS.CPS (
   mapRWS,
   withRWS,
   -- * The RWST monad transformer
-  RWST,
+  RWST(..),
   runRWST,
   evalRWST,
   execRWST,
