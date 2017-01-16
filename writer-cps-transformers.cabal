@@ -25,11 +25,23 @@ source-repository head
 library
   build-depends:
     base < 6,
-    transformers >= 0.4 && < 0.6
+    transformers >= 0.4 && < 0.6,
+    deriving-compat
   hs-source-dirs:
     src
   ghc-options: -Wall
   exposed-modules:
     Control.Monad.Trans.RWS.CPS
     Control.Monad.Trans.Writer.CPS
+    Control.Monad.Trans.Writer.Stricter
+  default-language: Haskell2010
+
+executable test
+  main-is: test.hs
+  ghc-options: -Wall
+  build-depends:
+    base < 6,
+    transformers >= 0.4 && < 0.6,
+    deriving-compat,
+    writer-cps-transformers, base
   default-language: Haskell2010
