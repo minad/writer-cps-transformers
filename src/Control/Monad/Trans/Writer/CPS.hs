@@ -117,6 +117,7 @@ newtype WriterT w m a = WriterT { unWriterT :: w -> m (a, w) }
 
 writerT :: (Functor m, Monoid w) => m (a, w) -> WriterT w m a
 writerT f = WriterT $ \w -> (\(a, w') -> let wt = w `mappend` w' in wt `seq` (a, wt)) <$> f
+{-# INLINE writerT #-}
 
 -- | Unwrap a writer computation.
 runWriterT :: Monoid w => WriterT w m a -> m (a, w)

@@ -144,6 +144,7 @@ newtype RWST r w s m a = RWST { unRWST :: r -> s -> w -> m (a, s, w) }
 
 rwsT :: (Functor m, Monoid w) => (r -> s -> m (a, s, w)) -> RWST r w s m a
 rwsT f = RWST $ \r s w -> (\(a, s', w') -> let wt = w `mappend` w' in wt `seq` (a, s', wt)) <$> f r s
+{-# INLINE rwsT #-}
 
 -- | Unwrap an RWST computation as a function.
 runRWST :: Monoid w => RWST r w s m a -> r -> s -> m (a, s, w)
