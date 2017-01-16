@@ -60,7 +60,10 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Signatures
 import Data.Functor.Identity
+
+#if !(MIN_VERSION_base(4,8,0))
 import Data.Monoid
+#endif
 
 #if MIN_VERSION_base(4,9,0)
 import qualified Control.Monad.Fail as Fail
