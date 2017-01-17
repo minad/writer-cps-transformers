@@ -37,6 +37,8 @@ module Control.Monad.Trans.Writer.CPS (
   execWriter,
   mapWriter,
   -- * The WriterT monad transformer
+  -- The constructor is deliberately not exported to avoid exposing the
+  -- hidden state of the Writer.
   WriterT,
   writerT,
   runWriterT,
@@ -54,20 +56,12 @@ module Control.Monad.Trans.Writer.CPS (
   liftCatch,
 ) where
 
-import Control.Applicative
-import Control.Monad
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import Control.Monad.Trans.Writer.CPS.Internal (WriterT(..))
 import Control.Monad.Signatures
 import Data.Functor.Identity
 
 #if !(MIN_VERSION_base(4,8,0))
 import Data.Monoid
-#endif
-
-#if MIN_VERSION_base(4,9,0)
-import qualified Control.Monad.Fail as Fail
 #endif
 
 -- ---------------------------------------------------------------------------
@@ -104,17 +98,10 @@ mapWriter :: (Monoid w, Monoid w') => ((a, w) -> (b, w')) -> Writer w a -> Write
 mapWriter f = mapWriterT (Identity . f . runIdentity)
 {-# INLINE mapWriter #-}
 
--- ---------------------------------------------------------------------------
--- | A writer monad parameterized by:
---
---   * @w@ - the output to accumulate.
---
---   * @m@ - The inner monad.
---
--- The 'return' function produces the output 'mempty', while '>>='
--- combines the outputs of the subcomputations using 'mappend'.
-newtype WriterT w m a = WriterT { unWriterT :: w -> m (a, w) }
-
+-- | The WriterT constructor is deliberately not exported to avoid exposing the
+-- hidden state w.
+-- This provides the safe way to construct a WriterT with the same api as the
+-- original WriterT.
 writerT :: (Functor m, Monoid w) => m (a, w) -> WriterT w m a
 writerT f = WriterT $ \w -> (\(a, w') -> let wt = w `mappend` w' in wt `seq` (a, wt)) <$> f
 {-# INLINE writerT #-}
@@ -144,67 +131,6 @@ mapWriterT f m = WriterT $ \w -> do
   let wt = w `mappend` w'
   wt `seq` return (a, wt)
 {-# INLINE mapWriterT #-}
-
-instance Functor m => Functor (WriterT w m) where
-  fmap f m = WriterT $ \w -> (\(a, w') -> (f a, w')) <$> unWriterT m w
-  {-# INLINE fmap #-}
-
-instance (Functor m, Monad m) => Applicative (WriterT w m) where
-  pure a = WriterT $ \w -> return (a, w)
-  {-# INLINE pure #-}
-
-  WriterT mf <*> WriterT mx = WriterT $ \w -> do
-    (f, w') <- mf w
-    (x, w'') <- mx w'
-    return (f x, w'')
-  {-# INLINE (<*>) #-}
-
-instance (Functor m, MonadPlus m) => Alternative (WriterT w m) where
-  empty = WriterT $ const mzero
-  {-# INLINE empty #-}
-
-  WriterT m <|> WriterT n = WriterT $ \w -> m w `mplus` n w
-  {-# INLINE (<|>) #-}
-
-instance Monad m => Monad (WriterT w m) where
-#if !(MIN_VERSION_base(4,8,0))
-  return a = WriterT $ \w -> return (a, w)
-  {-# INLINE return #-}
-#endif
-
-  m >>= k = WriterT $ \w -> do
-    (a, w') <- unWriterT m w
-    unWriterT (k a) w'
-  {-# INLINE (>>=) #-}
-
-  fail msg = WriterT $ \_ -> fail msg
-  {-# INLINE fail #-}
-
-#if MIN_VERSION_base(4,9,0)
-instance Fail.MonadFail m => Fail.MonadFail (WriterT w m) where
-  fail msg = WriterT $ \_ -> Fail.fail msg
-  {-# INLINE fail #-}
-#endif
-
-instance (Functor m, MonadPlus m) => MonadPlus (WriterT w m) where
-  mzero = empty
-  {-# INLINE mzero #-}
-  mplus = (<|>)
-  {-# INLINE mplus #-}
-
-instance MonadFix m => MonadFix (WriterT w m) where
-  mfix f = WriterT $ \w -> mfix $ \ ~(a, _) -> unWriterT (f a) w
-  {-# INLINE mfix #-}
-
-instance MonadTrans (WriterT w) where
-  lift m = WriterT $ \w -> do
-    a <- m
-    return (a, w)
-  {-# INLINE lift #-}
-
-instance MonadIO m => MonadIO (WriterT w m) where
-  liftIO = lift . liftIO
-  {-# INLINE liftIO #-}
 
 -- | @'tell' w@ is an action that produces the output @w@.
 tell :: (Monoid w, Monad m) => w -> WriterT w m ()
