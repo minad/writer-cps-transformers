@@ -385,14 +385,14 @@ gets f = RWST $ \_ s w -> return (f s, s, w)
 -- continuation.
 liftCallCC :: CallCC m (a,s,w) (b,s,w) -> CallCC (RWST r w s m) a b
 liftCallCC callCC f = RWST $ \r s w ->
-  callCC $ \c -> unRWST (f (\a -> RWST $ \_ _ w' -> c (a, s, w'))) r s w
+  callCC $ \c -> unRWST (f (\a -> RWST $ \_ _ _ -> c (a, s, w))) r s w
 {-# INLINE liftCallCC #-}
 
 -- | In-situ lifting of a @callCC@ operation to the new monad.
 -- This version uses the current state on entering the continuation.
 liftCallCC' :: CallCC m (a,s,w) (b,s,w) -> CallCC (RWST r w s m) a b
 liftCallCC' callCC f = RWST $ \r s w ->
-  callCC $ \c -> unRWST (f (\a -> RWST $ \_ s' w' -> c (a, s', w'))) r s w
+  callCC $ \c -> unRWST (f (\a -> RWST $ \_ s' _ -> c (a, s', w))) r s w
 {-# INLINE liftCallCC' #-}
 
 -- | Lift a @catchE@ operation to the new monad.

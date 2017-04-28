@@ -50,7 +50,6 @@ module Control.Monad.Trans.Writer.CPS.Internal (
   censor,
   -- * Lifting other operations
   liftCallCC,
-  liftCallCC',
   liftCatch,
 ) where
 
@@ -270,14 +269,6 @@ liftCallCC :: CallCC m (a, w) (b, w) -> CallCC (WriterT w m) a b
 liftCallCC callCC f = WriterT $ \w ->
   callCC $ \c -> unWriterT (f (\a -> WriterT $ \_ -> c (a, w))) w
 {-# INLINE liftCallCC #-}
-
--- | In-situ lifting of a @callCC@ operation to the new monad.
--- This version uses the current state on entering the continuation.
--- It does not satisfy the uniformity property (see "Control.Monad.Signatures").
-liftCallCC' :: CallCC m (a, w) (b, w) -> CallCC (WriterT w m) a b
-liftCallCC' callCC f = WriterT $ \w ->
-  callCC $ \c -> unWriterT (f (\a -> WriterT $ \w' -> c (a, w'))) w
-{-# INLINE liftCallCC' #-}
 
 -- | Lift a @catchE@ operation to the new monad.
 liftCatch :: Catch e m (a, w) -> Catch e (WriterT w m) a

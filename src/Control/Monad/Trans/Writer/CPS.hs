@@ -50,7 +50,6 @@ module Control.Monad.Trans.Writer.CPS (
   censor,
   -- * Lifting other operations
   liftCallCC,
-  liftCallCC',
   liftCatch,
 ) where
 
