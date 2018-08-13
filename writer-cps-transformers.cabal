@@ -2,13 +2,13 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e9976e85c440fea3d0645421112f3f6345cd6b896e11502e7357cc0d1f62feca
+-- hash: 960d92b10149a18655f2cab1b7d8ada8a0bf2861a8ef75960c36e1becf5aa637
 
 name:           writer-cps-transformers
 version:        0.1.1.3
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 7.0.4, GHC == 7.2.2, GHC == 7.4.2, GHC == 7.6.3, GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.1, GHC == 8.2.1, GHC == 8.4.3, GHC == 8.6.1
+tested-with:    GHC == 7.10.3, GHC == 8.0.1, GHC == 8.2.1, GHC == 8.4.3, GHC == 8.6.1
 author:         Andy Gill, Ross Paterson, Daniel Mendler
 maintainer:     mail@daniel-mendler.de
 copyright:      2016 Daniel Mendler
