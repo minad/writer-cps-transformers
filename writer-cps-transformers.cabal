@@ -1,14 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
---
--- see: https://github.com/sol/hpack
---
--- hash: 576c406d9aac3bea16cb85449008df2937814083c586f52e7a37b8d1a1306309
-
 name:           writer-cps-transformers
 version:        0.1.1.4
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 7.10.3, GHC == 8.0.1, GHC == 8.2.1, GHC == 8.4.3, GHC == 8.6.1
+tested-with:    GHC == 7.10.3, GHC == 8.0.1, GHC == 8.2.1, GHC == 8.4.3, GHC == 8.4.4, GHC == 8.6.1, GHC == 8.6.2, GHC == 8.6.3, GHC == 8.6.4
 author:         Andy Gill, Ross Paterson, Daniel Mendler
 maintainer:     mail@daniel-mendler.de
 copyright:      2016 Daniel Mendler
@@ -36,6 +30,4 @@ library
     Control.Monad.Trans.RWS.CPS.Internal
     Control.Monad.Trans.Writer.CPS
     Control.Monad.Trans.Writer.CPS.Internal
-  other-modules:
-    Paths_writer_cps_transformers
   default-language: Haskell2010
